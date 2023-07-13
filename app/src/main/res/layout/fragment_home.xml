@@ -2,14 +2,14 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="top"
     android:orientation="vertical">
 
     <TextView
         android:id="@+id/text_home"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="25dp"
@@ -20,7 +20,7 @@
 
     <ImageView
         android:id="@+id/imageView2"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginLeft="25dp"
@@ -32,8 +32,8 @@
         android:src="@drawable/mv5bzmu0m2y1ogutzjixni00zjbkltg1mjgtowiynthizwiwyjrixkeyxkfqcgdeqxvymtqxnzmzndi___v1_fmjpg_ux1000_" />
 
     <TextView
-        android:id="@+id/text_home2"
-        android:layout_width="wrap_content"
+        android:id="@+id/titleView"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:text="Back to the Future"
@@ -42,8 +42,8 @@
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/text_home3"
-        android:layout_width="wrap_content"
+        android:id="@+id/genreView"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:text="Genres: Adventure, Comedy, Sci-Fi"
@@ -52,7 +52,7 @@
         android:textStyle="italic" />
 
     <TextView
-        android:id="@+id/text_home4"
+        android:id="@+id/plotView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
