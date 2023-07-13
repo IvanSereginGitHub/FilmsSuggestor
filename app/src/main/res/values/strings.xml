@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">FilmsSuggester</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="navigation_drawer_open">Open menu</string>
+    <string name="navigation_drawer_close">Close menu</string>
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
@@ -9,6 +9,8 @@
     <string name="action_info">Information</string>
     <string name="menu_home">Home</string>
     <string name="menu_archive">Archive</string>
+    <string name="menu_info">Information</string>
     <string name="menu_search">Search</string>
     <string name="app_name_noncamel">Films Suggester</string>
+    <string name="app_info">This application uses two APIs - one is OMDB (<a href="https://www.omdbapi.com">https://www.omdbapi.com</a>) to get random movies and the other is WorldTimeAPI (<a href="http://worldtimeapi.org">http://worldtimeapi.org</a>) to control refresh time. New movie shows up every 24 hours, and each checked movie will be recorder to the database to view the IMDB page later.</string>
 </resources>

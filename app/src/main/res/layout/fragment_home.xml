@@ -73,4 +73,16 @@
         android:textColor="?attr/actionMenuTextColor"
         app:iconTint="?attr/colorControlActivated" />
 
+    <TextView
+        android:id="@+id/text_home6"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="20dp"
+        android:text="Time remaining before new suggestion: 15:02"
+        android:textAlignment="center"
+        android:textAllCaps="false"
+        android:textSize="10sp"
+        android:textStyle="bold|italic" />
+
 </LinearLayout>
