@@ -49,15 +49,6 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_home, R.id.nav_archive, R.id.nav_info), drawerLayout)
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
-        // Declaring and Initializing
-        // the TextView from the layout file
-        setContentView(R.layout.fragment_info)
-        val mTextView = findViewById<TextView>(R.id.text_view_1)
-
-        // Finding and displaying the content
-        // that consists a URL as a hyperlink
-        mTextView.movementMethod = LinkMovementMethod.getInstance()
-        setContentView(binding.root)
         AsynchronousGet().run("http://worldtimeapi.org/api/ip")
     }
 
