@@ -1,0 +1,4 @@
+com.vanIvan.filmssuggestor.test.app-androidTest-0 C:\Users\hgfef\AndroidStudioProjects\FilmsSuggestor\app\build\generated\res\resValues\androidTest\debug
+com.vanIvan.filmssuggestor.test.app-mergeDebugAndroidTestResources-1 C:\Users\hgfef\AndroidStudioProjects\FilmsSuggestor\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\merged.dir
+com.vanIvan.filmssuggestor.test.app-mergeDebugAndroidTestResources-2 C:\Users\hgfef\AndroidStudioProjects\FilmsSuggestor\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\stripped.dir
+com.vanIvan.filmssuggestor.test.app-merged_res-3 C:\Users\hgfef\AndroidStudioProjects\FilmsSuggestor\app\build\intermediates\merged_res\debugAndroidTest
