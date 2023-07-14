@@ -39,10 +39,6 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.appBarMain.toolbar)
 
-//        binding.appBarMain.fab.setOnClickListener { view ->
-//            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                    .setAction("Action", null).show()
-//        }
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_content_main)
@@ -119,95 +115,4 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
-//
-//    fun runMovie(url: String) {
-//        val request = Request.Builder()
-//            .url(url)
-//            .build()
-//        var res: String? = ""
-//        client.newCall(request).enqueue(object : Callback {
-//            override fun onFailure(call: Call, e: IOException) {
-//                e.printStackTrace()
-//            }
-//
-//            override fun onResponse(call: Call, response: Response) {
-//                response.use {
-//                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
-//
-//                    for ((name, value) in response.headers) {
-//                        println("$name: $value")
-//                    }
-//
-//                    res = response.body?.string()
-//                    var json = JSONObject(res)
-//                    if(json.has("Error")) {
-//                        println("Unexpected error, trying again...")
-//                        Thread.sleep(1_000)
-//                        generateIMDBid()
-//                        return
-//                    }
-//                    println(json)
-//                    println(R.id.nav_home)
-//                    runOnUiThread(Runnable {
-////                        setContentView(R.layout.activity_main)
-//                        println(R.id.nav_home)
-//                        println(supportFragmentManager.fragments[0].tag)
-//                        val fragment: HomeFragment? =
-//                            supportFragmentManager.findFragmentById(R.id.nav_home) as HomeFragment?
-//                        val executor = Executors.newSingleThreadExecutor()
-//                        val handler = Handler(Looper.getMainLooper())
-//                        var image: Bitmap? = null
-//                        executor.execute{
-//
-//                            val imageUrl = json.getString("Poster")
-//                            val title = json.getString("Title")
-//                            val genre = json.getString("Genre")
-//                            val plot = json.getString("Plot")
-//                            if(imageUrl == "N\\/A") {
-//                                Thread.sleep(1_000)
-//                                generateIMDBid()
-//                                executor.shutdown()
-//                            }
-//                            try {
-//                                val `in` = java.net.URL(imageUrl).openStream()
-//                                image = BitmapFactory.decodeStream(`in`)
-//                                handler.post{
-//                                    fragment?.updateText(image, title, genre, plot)
-//                                    println(fragment)
-//                                    if(fragment != null) {
-//                                        val ft: FragmentTransaction =
-//                                            supportFragmentManager.beginTransaction()
-//                                        ft.detach(fragment as Fragment)
-//                                        ft.attach(fragment as Fragment)
-//                                        ft.commit()
-//                                    }
-//                                }
-//                            }
-//                            catch (e:java.lang.Exception) {
-//                                e.printStackTrace()
-//                            }
-//                            fragment?.updateText(null, title, genre, plot)
-//                            println(fragment)
-//                            if(fragment != null) {
-//                                val ft: FragmentTransaction =
-//                                    supportFragmentManager.beginTransaction()
-//                                ft.detach(fragment as Fragment)
-//                                ft.attach(fragment as Fragment)
-//                                ft.commit()
-//                            }
-//                        }
-//                    })
-//                }
-//            }
-//        })
-//    }
-//
-//    fun generateIMDBid() {
-//        val api_key = "9cc1ed67"
-//        val rnds = (1..7000000).random()
-//
-//        val url = "http://www.omdbapi.com/?i=tt${rnds}&apikey=${api_key}"
-//        println(url)
-//        runMovie(url)
-//    }
 }

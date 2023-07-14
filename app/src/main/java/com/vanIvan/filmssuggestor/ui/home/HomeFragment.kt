@@ -16,8 +16,6 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
-import androidx.fragment.app.findFragment
 import androidx.lifecycle.ViewModelProvider
 import com.vanIvan.filmssuggestor.DBHelper
 import com.vanIvan.filmssuggestor.R
@@ -31,10 +29,12 @@ import org.json.JSONObject
 import java.io.IOException
 import java.util.concurrent.Executors
 
+const val api_key = "9cc1ed67"
 
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
+
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -51,7 +51,6 @@ class HomeFragment : Fragment() {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val api_key = "9cc1ed67"
         val rnds = (1..7000000).random()
 
         val url = "http://www.omdbapi.com/?i=tt${rnds}&apikey=${api_key}"
@@ -111,28 +110,26 @@ class HomeFragment : Fragment() {
     }
 
     private val client = OkHttpClient()
-    fun runMovie(url: String) {
-        val request = Request.Builder()
-            .url(url)
-            .build()
-        var res: String? = ""
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                runOnUiThread {
-                    Toast.makeText(
-                        activity,
-                        "Catched timeout, restarting...",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-                e.printStackTrace()
-                generateIMDBid()
-                return
-            }
 
-            override fun onResponse(call: Call, response: Response) {
-                response.use {
-                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+    fun runMovie(url: String) {
+        var thread = Thread {
+            try {
+                val request = Request.Builder()
+                    .url(url)
+                    .build()
+                var res: String? = ""
+                client.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        runOnUiThread {
+                            Toast.makeText(
+                                activity,
+                                "Catched error, restarting...",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                        generateIMDBid()
+                    }
 
                     for ((name, value) in response.headers) {
                         println("$name: $value")
@@ -140,11 +137,12 @@ class HomeFragment : Fragment() {
 
                     res = response.body?.string()
                     var json = JSONObject(res)
+                    println(json)
                     if (json.has("Error")) {
                         println("Unexpected error, trying again...")
                         Thread.sleep(1_000)
                         generateIMDBid()
-                        return
+                        return@Thread
                     }
 
                     val executor = Executors.newSingleThreadExecutor()
@@ -153,11 +151,43 @@ class HomeFragment : Fragment() {
                     executor.execute {
 
                         val imageUrl = json.getString("Poster")
-                        val title = json.getString("Title")
+                        var title = json.getString("Title")
                         val genre = json.getString("Genre")
                         val plot = json.getString("Plot")
-                        var imdbID = json.getString("imdbID")
-                        if(genre.contains("Adult", true)) {
+                        val imdbID = json.getString("imdbID")
+                        if (json.has("seriesID")) {
+                            val seriesID = json.getString("seriesID")
+                            var seriesTitle: String? = null
+
+                            val url = "http://www.omdbapi.com/?i=${seriesID}&apikey=${api_key}"
+                            val request = Request.Builder()
+                                .url(url)
+                                .build()
+                            println("getting series name")
+                            client.newCall(request).execute().use { response1 ->
+                                if (!response1.isSuccessful) {
+                                    seriesTitle = null
+                                }
+
+                                for ((name, value) in response1.headers) {
+                                    println("$name: $value")
+                                }
+
+                                var json = JSONObject(response1.body?.string())
+                                println(json)
+                                if (json.has("Error")) {
+                                    println("Unexpected error")
+                                }
+                                if(json.has("Title")) {
+                                    seriesTitle = json.getString("Title")
+                                }
+                            }
+                            if (seriesTitle != null) {
+                                println("found series name: $seriesTitle")
+                                title = "$seriesTitle ($title)"
+                            }
+                        }
+                        if (genre.contains("Adult", true)) {
                             runOnUiThread {
                                 Toast.makeText(
                                     activity,
@@ -180,19 +210,68 @@ class HomeFragment : Fragment() {
                         } catch (e: java.lang.Exception) {
                             e.printStackTrace()
                         }
+                        println("updating")
                         updateText(title, genre, plot, imdbID)
                     }
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                runOnUiThread {
+                    Toast.makeText(
+                        activity,
+                        "Catched error, restarting...",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+                generateIMDBid()
+                return@Thread
             }
-        })
+        }
+        thread.start()
     }
 
     fun generateIMDBid() {
-        val api_key = "9cc1ed67"
         val rnds = (1..7000000).random()
 
         val url = "http://www.omdbapi.com/?i=tt${rnds}&apikey=${api_key}"
         runMovie(url)
+    }
+
+    fun getSerialInfo(id: String): String? {
+        val url = "http://www.omdbapi.com/?i=${id}&apikey=${api_key}"
+        val request = Request.Builder()
+            .url(url)
+            .build()
+        var res: String? = ""
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+                return
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                response.use {
+                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+                    for ((name, value) in response.headers) {
+                        println("$name: $value")
+                    }
+
+                    res = response.body?.string()
+                    var json = JSONObject(res)
+                    println(json)
+                    if (json.has("Error")) {
+                        println("Unexpected error")
+                        res = null
+                        return
+                    }
+                    res = json.getString("Title")
+                    println(res)
+                }
+            }
+        })
+        return res
+        println(res)
     }
 
     fun Fragment?.runOnUiThread(action: () -> Unit) {
