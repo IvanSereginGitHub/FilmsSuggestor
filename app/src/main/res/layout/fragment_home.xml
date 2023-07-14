@@ -13,10 +13,19 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="25dp"
-        android:text="Today's your movie is:"
+        android:text="Your new movie suggestion is:"
         android:textAlignment="center"
         android:textSize="20sp"
         android:textStyle="bold" />
+
+    <ProgressBar
+        android:id="@+id/progressBar1"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:layout_marginTop="25dp" />
 
     <ImageView
         android:id="@+id/imageView2"
@@ -28,16 +37,15 @@
         android:layout_marginRight="25dp"
         android:layout_marginBottom="25dp"
         android:layout_weight="1"
-        android:scaleType="fitCenter"
-        android:src="@drawable/mv5bzmu0m2y1ogutzjixni00zjbkltg1mjgtowiynthizwiwyjrixkeyxkfqcgdeqxvymtqxnzmzndi___v1_fmjpg_ux1000_" />
+        android:scaleType="fitCenter"/>
 
     <TextView
         android:id="@+id/titleView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Back to the Future"
         android:textAlignment="center"
+        android:textIsSelectable="true"
         android:textSize="21sp"
         android:textStyle="bold" />
 
@@ -46,7 +54,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Genres: Adventure, Comedy, Sci-Fi"
         android:textAlignment="center"
         android:textSize="16sp"
         android:textStyle="italic" />
@@ -56,7 +63,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Marty McFly, a 17-year-old high school student, is accidentally sent 30 years into the past in a time-traveling DeLorean invented by his close friend, the maverick scientist Doc Brown"
         android:textAlignment="center"
         android:textSize="12sp"
         android:textStyle="italic" />
@@ -70,6 +76,7 @@
         android:layout_marginBottom="15dp"
         android:backgroundTint="?android:attr/colorActivatedHighlight"
         android:text="IMDB page"
+        android:visibility="gone"
         android:textColor="?attr/actionMenuTextColor"
         app:iconTint="?attr/colorControlActivated" />
 

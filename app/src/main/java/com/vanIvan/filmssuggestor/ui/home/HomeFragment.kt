@@ -1,14 +1,18 @@
 package com.vanIvan.filmssuggestor.ui.home
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -35,10 +39,6 @@ class HomeFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
-    private var imageView: ImageView? = null
-    private var titleView: TextView? = null
-    private var genreView: TextView? = null
-    private var plotView: TextView? = null
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
@@ -49,11 +49,6 @@ class HomeFragment : Fragment() {
 
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
-        println(R.id.imageView2)
-        imageView = view?.findViewById<ImageView>(R.id.imageView2)
-        titleView = view?.findViewById<TextView>(R.id.titleView)
-        genreView = view?.findViewById<TextView>(R.id.genreView)
-        plotView = view?.findViewById<TextView>(R.id.plotView)
 
         val api_key = "9cc1ed67"
         val rnds = (1..7000000).random()
@@ -73,11 +68,17 @@ class HomeFragment : Fragment() {
         _binding = null
     }
 
-    public fun updateText(binaryImage: Bitmap?, title: String, genre: String, plot: String) {
+    public fun updateText(binaryImage: Bitmap?, title: String, genre: String, plot: String, imdb_id: String) {
         runOnUiThread {
+            view?.findViewById<ProgressBar>(R.id.progressBar1)?.visibility = View.GONE
             view?.findViewById<TextView>(R.id.titleView)?.text = title
             view?.findViewById<TextView>(R.id.genreView)?.text = "Genres: $genre"
             view?.findViewById<TextView>(R.id.plotView)?.text = plot
+            view?.findViewById<Button>(R.id.button)?.visibility = View.VISIBLE
+            view?.findViewById<Button>(R.id.button)?.setOnClickListener {
+                val i = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.imdb.com/title/$imdb_id"))
+                startActivity(i)
+            }
         }
 
 //        imageView?.setImageBitmap(binaryImage)
@@ -113,7 +114,6 @@ class HomeFragment : Fragment() {
                         generateIMDBid()
                         return
                     }
-                    println(json)
 
                         val executor = Executors.newSingleThreadExecutor()
                         val handler = Handler(Looper.getMainLooper())
@@ -124,6 +124,7 @@ class HomeFragment : Fragment() {
                             val title = json.getString("Title")
                             val genre = json.getString("Genre")
                             val plot = json.getString("Plot")
+                            var imdbID = json.getString("imdbID")
                             if(imageUrl == "N\\/A") {
                                 Thread.sleep(1_000)
                                 generateIMDBid()
@@ -141,7 +142,7 @@ class HomeFragment : Fragment() {
                             catch (e:java.lang.Exception) {
                                 e.printStackTrace()
                             }
-                            updateText(null, title, genre, plot)
+                            updateText(null, title, genre, plot, imdbID)
                         }
                 }
             }
@@ -153,7 +154,6 @@ class HomeFragment : Fragment() {
         val rnds = (1..7000000).random()
 
         val url = "http://www.omdbapi.com/?i=tt${rnds}&apikey=${api_key}"
-        println(url)
         runMovie(url)
     }
 fun Fragment?.runOnUiThread(action: () -> Unit) {
