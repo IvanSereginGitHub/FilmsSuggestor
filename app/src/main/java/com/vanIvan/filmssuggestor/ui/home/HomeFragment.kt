@@ -74,10 +74,12 @@ class HomeFragment : Fragment() {
     }
 
     public fun updateText(binaryImage: Bitmap?, title: String, genre: String, plot: String) {
+        runOnUiThread {
+            view?.findViewById<TextView>(R.id.titleView)?.text = title
+            view?.findViewById<TextView>(R.id.genreView)?.text = "Genres: $genre"
+            view?.findViewById<TextView>(R.id.plotView)?.text = plot
+        }
 
-        view?.findViewById<TextView>(R.id.titleView)?.text = title
-        view?.findViewById<TextView>(R.id.genreView)?.text = "Genres: $genre"
-        view?.findViewById<TextView>(R.id.plotView)?.text = plot
 //        imageView?.setImageBitmap(binaryImage)
 //        titleView?.text = title
 //        genreView?.text = "Genres: $genre"
