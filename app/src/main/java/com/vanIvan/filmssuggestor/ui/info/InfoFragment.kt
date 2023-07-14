@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.vanIvan.filmssuggestor.databinding.FragmentHomeBinding
+import com.vanIvan.filmssuggestor.R
 import com.vanIvan.filmssuggestor.databinding.FragmentInfoBinding
 
 class InfoFragment : Fragment() {
@@ -23,6 +23,7 @@ class InfoFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
+        println(inflater)
         val homeViewModel =
                 ViewModelProvider(this).get(InfoViewModel::class.java)
 

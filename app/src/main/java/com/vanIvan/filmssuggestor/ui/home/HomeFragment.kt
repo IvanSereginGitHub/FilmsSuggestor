@@ -14,8 +14,12 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
+import androidx.fragment.app.findFragment
 import androidx.lifecycle.ViewModelProvider
+import com.vanIvan.filmssuggestor.DBHelper
 import com.vanIvan.filmssuggestor.R
 import com.vanIvan.filmssuggestor.databinding.FragmentHomeBinding
 import okhttp3.Call
@@ -25,9 +29,6 @@ import okhttp3.Request
 import okhttp3.Response
 import org.json.JSONObject
 import java.io.IOException
-import java.io.InputStream
-import java.net.MalformedURLException
-import java.net.URL
 import java.util.concurrent.Executors
 
 
@@ -40,13 +41,13 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View {
         val homeViewModel =
-                ViewModelProvider(this).get(HomeViewModel::class.java)
-
+            ViewModelProvider(this).get(HomeViewModel::class.java)
+        println(inflater)
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
@@ -56,6 +57,9 @@ class HomeFragment : Fragment() {
         val url = "http://www.omdbapi.com/?i=tt${rnds}&apikey=${api_key}"
         runMovie(url)
         println("Recreating view...")
+        runOnUiThread {
+            view?.findViewById<Button>(R.id.refresh_button)?.visibility = View.VISIBLE
+        }
         val textView: TextView = binding.textHome
 //        homeViewModel.text.observe(viewLifecycleOwner) {
 //            textView.text = it
@@ -63,12 +67,24 @@ class HomeFragment : Fragment() {
         return root
     }
 
+    private fun refreshFragment() {
+        parentFragmentManager.beginTransaction().detach(this).commit();
+        parentFragmentManager.beginTransaction().attach(this).commit();
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 
-    public fun updateText(binaryImage: Bitmap?, title: String, genre: String, plot: String, imdb_id: String) {
+    public fun updateText(
+        title: String,
+        genre: String,
+        plot: String,
+        imdb_id: String
+    ) {
+        var db = DBHelper(requireContext(), null)
+        db.addEntry(title, imdb_id)
         runOnUiThread {
             view?.findViewById<ProgressBar>(R.id.progressBar1)?.visibility = View.GONE
             view?.findViewById<TextView>(R.id.titleView)?.text = title
@@ -79,6 +95,12 @@ class HomeFragment : Fragment() {
                 val i = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.imdb.com/title/$imdb_id"))
                 startActivity(i)
             }
+            view?.findViewById<com.google.android.material.button.MaterialButton>(R.id.refresh_button)?.visibility =
+                View.VISIBLE
+            view?.findViewById<com.google.android.material.button.MaterialButton>(R.id.refresh_button)
+                ?.setOnClickListener {
+                    refreshFragment()
+                }
         }
 
 //        imageView?.setImageBitmap(binaryImage)
@@ -87,6 +109,7 @@ class HomeFragment : Fragment() {
 //        plotView?.text = plot
 
     }
+
     private val client = OkHttpClient()
     fun runMovie(url: String) {
         val request = Request.Builder()
@@ -95,7 +118,16 @@ class HomeFragment : Fragment() {
         var res: String? = ""
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread {
+                    Toast.makeText(
+                        activity,
+                        "Catched timeout, restarting...",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
                 e.printStackTrace()
+                generateIMDBid()
+                return
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -108,42 +140,48 @@ class HomeFragment : Fragment() {
 
                     res = response.body?.string()
                     var json = JSONObject(res)
-                    if(json.has("Error")) {
+                    if (json.has("Error")) {
                         println("Unexpected error, trying again...")
                         Thread.sleep(1_000)
                         generateIMDBid()
                         return
                     }
 
-                        val executor = Executors.newSingleThreadExecutor()
-                        val handler = Handler(Looper.getMainLooper())
-                        var image: Bitmap? = null
-                        executor.execute{
+                    val executor = Executors.newSingleThreadExecutor()
+                    val handler = Handler(Looper.getMainLooper())
+                    var image: Bitmap? = null
+                    executor.execute {
 
-                            val imageUrl = json.getString("Poster")
-                            val title = json.getString("Title")
-                            val genre = json.getString("Genre")
-                            val plot = json.getString("Plot")
-                            var imdbID = json.getString("imdbID")
-                            if(imageUrl == "N\\/A") {
-                                Thread.sleep(1_000)
-                                generateIMDBid()
-                                executor.shutdown()
+                        val imageUrl = json.getString("Poster")
+                        val title = json.getString("Title")
+                        val genre = json.getString("Genre")
+                        val plot = json.getString("Plot")
+                        var imdbID = json.getString("imdbID")
+                        if(genre.contains("Adult", true)) {
+                            runOnUiThread {
+                                Toast.makeText(
+                                    activity,
+                                    "Whoops, this is 18+, cannot show that :)",
+                                    Toast.LENGTH_LONG
+                                ).show()
                             }
-                            try {
-                                val `in` = java.net.URL(imageUrl).openStream()
-                                image = BitmapFactory.decodeStream(`in`)
-                                handler.post{
-                                    runOnUiThread {
-                                        view?.findViewById<ImageView>(R.id.imageView2)?.setImageBitmap(image)
-                                    }
+                            generateIMDBid()
+                            return@execute
+                        }
+                        try {
+                            val `in` = java.net.URL(imageUrl).openStream()
+                            image = BitmapFactory.decodeStream(`in`)
+                            handler.post {
+                                runOnUiThread {
+                                    view?.findViewById<ImageView>(R.id.imageView2)
+                                        ?.setImageBitmap(image)
                                 }
                             }
-                            catch (e:java.lang.Exception) {
-                                e.printStackTrace()
-                            }
-                            updateText(null, title, genre, plot, imdbID)
+                        } catch (e: java.lang.Exception) {
+                            e.printStackTrace()
                         }
+                        updateText(title, genre, plot, imdbID)
+                    }
                 }
             }
         })
@@ -156,9 +194,10 @@ class HomeFragment : Fragment() {
         val url = "http://www.omdbapi.com/?i=tt${rnds}&apikey=${api_key}"
         runMovie(url)
     }
-fun Fragment?.runOnUiThread(action: () -> Unit) {
-    this ?: return
-    if (!isAdded) return // Fragment not attached to an Activity
-    activity?.runOnUiThread(action)
-}
+
+    fun Fragment?.runOnUiThread(action: () -> Unit) {
+        this ?: return
+        if (!isAdded) return // Fragment not attached to an Activity
+        activity?.runOnUiThread(action)
+    }
 }

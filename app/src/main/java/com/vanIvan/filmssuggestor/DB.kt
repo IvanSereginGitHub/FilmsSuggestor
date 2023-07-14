@@ -6,6 +6,15 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
+class TableData {
+    var id: String? = null
+    var title: String? = null
+    var imdb_id: String? = null
+
+    override fun toString(): String {
+        return "{id: $id, title: $title, imdb_id: $imdb_id}"
+    }
+}
 class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
     SQLiteOpenHelper(context, DATABASE_NAME, factory, DATABASE_VERSION) {
 
@@ -13,10 +22,8 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
     override fun onCreate(db: SQLiteDatabase) {
         // below is a sqlite query, where column names
         // along with their data types is given
-        val query = ("CREATE TABLE IF NOT EXISTS" + TABLE_NAME + " ("
-                + ID_COL + " INTEGER PRIMARY KEY, " +
-                TITLE_COL + " TEXT," +
-                IMDB_ID + " TEXT" + ")")
+        val query =
+            ("CREATE TABLE IF NOT EXISTS $TABLE_NAME ($ID_COL INTEGER PRIMARY KEY, $TITLE_COL TEXT, IMDB_ID INTEGER)")
 
         // we are calling sqlite
         // method for executing our query
@@ -30,7 +37,7 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
     }
 
     // This method is for adding data in our database
-    fun addEntry(title : String, imdb_id : String ){
+    fun addEntry(title: String, imdb_id: String) {
 
         // below we are creating
         // a content values variable
@@ -70,7 +77,34 @@ class DBHelper(context: Context, factory: SQLiteDatabase.CursorFactory?) :
 
     }
 
-    companion object{
+    fun getDataArray(): List<TableData> {
+
+        // here we are creating a readable
+        // variable of our database
+        // as we want to read value from it
+        val db = this.readableDatabase
+
+        // below code returns a cursor to
+        // read data from the database
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_NAME", null)
+        var arr = mutableListOf<TableData>()
+        if(cursor.moveToFirst()){
+            do{
+                var row = TableData()
+                row.id = cursor.getString(0)
+                row.title = cursor.getString(1)
+                row.imdb_id = cursor.getString(2)
+                arr.add(row);
+            } while(cursor.moveToNext());
+        }
+        return arr.toList()
+    }
+
+    fun getArrayResult() {
+
+    }
+
+    companion object {
         // here we have defined variables for our database
 
         // below is variable for database name

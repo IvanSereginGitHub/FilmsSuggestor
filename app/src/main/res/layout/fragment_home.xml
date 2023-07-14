@@ -2,6 +2,7 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="top"
@@ -37,7 +38,7 @@
         android:layout_marginRight="25dp"
         android:layout_marginBottom="25dp"
         android:layout_weight="1"
-        android:scaleType="fitCenter"/>
+        android:scaleType="fitCenter" />
 
     <TextView
         android:id="@+id/titleView"
@@ -76,20 +77,27 @@
         android:layout_marginBottom="15dp"
         android:backgroundTint="?android:attr/colorActivatedHighlight"
         android:text="IMDB page"
-        android:visibility="gone"
         android:textColor="?attr/actionMenuTextColor"
+        android:visibility="invisible"
         app:iconTint="?attr/colorControlActivated" />
 
-    <TextView
-        android:id="@+id/text_home6"
-        android:layout_width="match_parent"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/refresh_button"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="20dp"
-        android:text="Time remaining before new suggestion: 15:02"
-        android:textAlignment="center"
-        android:textAllCaps="false"
-        android:textSize="10sp"
-        android:textStyle="bold|italic" />
+        android:layout_marginBottom="25dp"
+        android:insetLeft="0dp"
+        android:insetTop="0dp"
+        android:insetRight="0dp"
+        android:insetBottom="0dp"
+        android:stateListAnimator="@null"
+        android:visibility="invisible"
+        app:backgroundTint="#00FFFFFF"
+        app:icon="@android:drawable/stat_notify_sync_noanim"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="50dp"
+        app:iconTint="?attr/actionMenuTextColor" />
 
 </LinearLayout>

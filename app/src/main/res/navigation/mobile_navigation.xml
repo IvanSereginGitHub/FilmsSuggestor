@@ -9,7 +9,8 @@
         android:id="@+id/nav_home"
         android:name="com.vanIvan.filmssuggestor.ui.home.HomeFragment"
         android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home"
+        android:tag="home_fragment"/>
 
     <fragment
         android:id="@+id/nav_archive"
@@ -20,6 +21,6 @@
     <fragment
         android:id="@+id/nav_info"
         android:name="com.vanIvan.filmssuggestor.ui.info.InfoFragment"
-        android:label="@string/menu_archive"
+        android:label="@string/menu_info"
         tools:layout="@layout/fragment_info" />
 </navigation>
