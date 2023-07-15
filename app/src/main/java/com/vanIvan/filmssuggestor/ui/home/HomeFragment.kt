@@ -1,23 +1,31 @@
 package com.vanIvan.filmssuggestor.ui.home
 
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.TypedValue
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
+import android.widget.TableLayout
+import android.widget.TableRow
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
 import com.vanIvan.filmssuggestor.DBHelper
 import com.vanIvan.filmssuggestor.R
 import com.vanIvan.filmssuggestor.databinding.FragmentHomeBinding
@@ -51,15 +59,15 @@ class HomeFragment : Fragment() {
         println(inflater)
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
-
-        val rnds = (1..7000000).random()
-
-        val url = "http://www.omdbapi.com/?i=tt${rnds}&apikey=${api_key}"
-        runMovie(url)
-        println("Recreating view...")
-        runOnUiThread {
-            view?.findViewById<Button>(R.id.refresh_button)?.visibility = View.VISIBLE
-        }
+//
+//        val rnds = (1..7000000).random()
+//
+//        val url = "http://www.omdbapi.com/?i=tt${rnds}&apikey=${api_key}"
+//        runMovie(url)
+//        println("Recreating view...")
+//        runOnUiThread {
+//            view?.findViewById<Button>(R.id.refresh_button)?.visibility = View.VISIBLE
+//        }
         val textView: TextView = binding.textHome
 //        homeViewModel.text.observe(viewLifecycleOwner) {
 //            textView.text = it
@@ -70,6 +78,10 @@ class HomeFragment : Fragment() {
     private fun refreshFragment() {
         parentFragmentManager.beginTransaction().detach(this).commit();
         parentFragmentManager.beginTransaction().attach(this).commit();
+    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        startGettingMovie()
     }
 
     override fun onDestroyView() {
@@ -114,6 +126,7 @@ class HomeFragment : Fragment() {
 
 
     fun runMovie(url: String) {
+
         var thread = Thread {
             try {
                 val request = Request.Builder()
@@ -148,7 +161,7 @@ class HomeFragment : Fragment() {
 
                     val executor = Executors.newSingleThreadExecutor()
                     val handler = Handler(Looper.getMainLooper())
-                    var image: Bitmap? = null
+                    //var image: Bitmap? = null
                     executor.execute {
 
                         val imageUrl = json.getString("Poster")
@@ -161,13 +174,21 @@ class HomeFragment : Fragment() {
                             var seriesTitle: String? = null
 
                             val url = "http://www.omdbapi.com/?i=${seriesID}&apikey=${api_key}"
-                            val request = Request.Builder()
+                            val request1 = Request.Builder()
                                 .url(url)
                                 .build()
                             println("getting series name")
-                            client.newCall(request).execute().use { response1 ->
+                            client.newCall(request1).execute().use { response1 ->
                                 if (!response1.isSuccessful) {
+                                    runOnUiThread {
+                                        Toast.makeText(
+                                            activity,
+                                            "Could not retrieve series title...",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
                                     seriesTitle = null
+                                    return@execute
                                 }
 
                                 for ((name, value) in response1.headers) {
@@ -201,7 +222,7 @@ class HomeFragment : Fragment() {
                         }
                         try {
                             val `in` = java.net.URL(imageUrl).openStream()
-                            image = BitmapFactory.decodeStream(`in`)
+                            val image = BitmapFactory.decodeStream(`in`)
                             handler.post {
                                 runOnUiThread {
                                     view?.findViewById<ImageView>(R.id.imageView2)
@@ -210,14 +231,6 @@ class HomeFragment : Fragment() {
                             }
                         } catch (e: java.lang.Exception) {
                             e.printStackTrace()
-                            println("getting alternative image")
-                            runOnUiThread {
-                                Glide.with(requireView())
-                                    .clear(view?.findViewById<ImageView>(R.id.imageView2)!!)
-                                Glide.with(requireView())
-                                    .load("https://cataas.com/cat/gif")
-                                    .into(view?.findViewById<ImageView>(R.id.imageView2)!!)
-                            }
                         }
                         println("updating")
                         updateText(title, genre, plot, imdbID)
@@ -237,6 +250,19 @@ class HomeFragment : Fragment() {
             }
         }
         thread.start()
+    }
+
+    fun startGettingMovie() {
+        runOnUiThread {
+            Glide.with(requireView())
+                .clear(view?.findViewById<ImageView>(R.id.imageView2)!!)
+            val requestOptions = RequestOptions()
+                .diskCacheStrategy(DiskCacheStrategy.NONE) // because file name is always same
+                .skipMemoryCache(true)
+            Glide.with(requireView())
+                .load("https://cataas.com/cat/gif").apply(requestOptions).into(view?.findViewById<ImageView>(R.id.imageView2)!!)
+        }
+        generateIMDBid()
     }
 
     fun generateIMDBid() {
