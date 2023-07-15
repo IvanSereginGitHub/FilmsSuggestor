@@ -17,6 +17,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
 import com.vanIvan.filmssuggestor.DBHelper
 import com.vanIvan.filmssuggestor.R
 import com.vanIvan.filmssuggestor.databinding.FragmentHomeBinding
@@ -178,7 +179,7 @@ class HomeFragment : Fragment() {
                                 if (json.has("Error")) {
                                     println("Unexpected error")
                                 }
-                                if(json.has("Title")) {
+                                if (json.has("Title")) {
                                     seriesTitle = json.getString("Title")
                                 }
                             }
@@ -209,6 +210,14 @@ class HomeFragment : Fragment() {
                             }
                         } catch (e: java.lang.Exception) {
                             e.printStackTrace()
+                            println("getting alternative image")
+                            runOnUiThread {
+                                Glide.with(requireView())
+                                    .clear(view?.findViewById<ImageView>(R.id.imageView2)!!)
+                                Glide.with(requireView())
+                                    .load("https://cataas.com/cat/gif")
+                                    .into(view?.findViewById<ImageView>(R.id.imageView2)!!)
+                            }
                         }
                         println("updating")
                         updateText(title, genre, plot, imdbID)
