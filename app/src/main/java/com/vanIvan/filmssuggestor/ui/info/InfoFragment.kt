@@ -23,16 +23,12 @@ class InfoFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
-        println(inflater)
         val homeViewModel =
                 ViewModelProvider(this).get(InfoViewModel::class.java)
 
         _binding = FragmentInfoBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-//        homeViewModel.text.observe(viewLifecycleOwner) {
-//            textView.text = it
-//        }
         return root
     }
 

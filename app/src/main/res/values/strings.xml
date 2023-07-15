@@ -12,5 +12,5 @@
     <string name="menu_info">Information</string>
     <string name="menu_search">Search</string>
     <string name="app_name_noncamel">Films Suggester</string>
-    <string name="app_info">This application uses API called OMDB (https://www.omdbapi.com) to get random movies. Please note, that there is limit to 1000 requests per day limit, and depending on your *unluck* (since there is no way to get random movie directly from API, app generates random IMDB id) those 1000 request can easily be used in one go.</string>
+    <string name="app_info">This application uses API called OMDB (https://www.omdbapi.com) to get random movies. Please note, that there is a limit to 1000 requests per day, and depending on your ID generation algorithm results (since there is no way to get random movie directly from API) those 1000 request can easily be used in one go. Please use this service sparingly...</string>
 </resources>

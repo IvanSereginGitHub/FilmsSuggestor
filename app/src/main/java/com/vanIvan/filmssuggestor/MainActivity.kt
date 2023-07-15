@@ -50,8 +50,6 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         navView.setupWithNavController(navController)
-        run("http://worldtimeapi.org/api/ip")
-//        generateIMDBid()
     }
 
 
@@ -64,55 +62,5 @@ class MainActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
-    }
-
-    public fun addTableRow(data: TableData) {
-        val table = findViewById<TableLayout>(R.id.table)
-        val row = TableRow(this)
-        row.layoutParams =
-            TableLayout.LayoutParams(
-                TableLayout.LayoutParams.MATCH_PARENT,
-                TableLayout.LayoutParams.WRAP_CONTENT
-            )
-        val text = TextView(this)
-        text.text = "Hello"
-        text.layoutParams = TableRow.LayoutParams(
-            TableRow.LayoutParams.WRAP_CONTENT,
-            TableRow.LayoutParams.WRAP_CONTENT
-        )
-        row.addView(text)
-
-        val button = Button(this)
-        button.text = "Click me"
-        button.layoutParams = TableRow.LayoutParams(
-            TableRow.LayoutParams.WRAP_CONTENT,
-            TableRow.LayoutParams.WRAP_CONTENT
-        )
-        row.addView(button)
-        table.addView(row);
-    }
-
-    private val client = OkHttpClient()
-    fun run(url: String) {
-        val request = Request.Builder()
-            .url(url)
-            .build()
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                response.use {
-                    if (!response.isSuccessful) throw IOException("Unexpected code $response")
-
-                    for ((name, value) in response.headers) {
-                        println("$name: $value")
-                    }
-
-                    println(response.body?.string())
-                }
-            }
-        })
     }
 }

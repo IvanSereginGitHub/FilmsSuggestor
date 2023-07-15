@@ -1,5 +1,6 @@
 package com.vanIvan.filmssuggestor.ui.home
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.Color
@@ -56,22 +57,10 @@ class HomeFragment : Fragment() {
     ): View {
         val homeViewModel =
             ViewModelProvider(this).get(HomeViewModel::class.java)
-        println(inflater)
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
-//
-//        val rnds = (1..7000000).random()
-//
-//        val url = "http://www.omdbapi.com/?i=tt${rnds}&apikey=${api_key}"
-//        runMovie(url)
-//        println("Recreating view...")
-//        runOnUiThread {
-//            view?.findViewById<Button>(R.id.refresh_button)?.visibility = View.VISIBLE
-//        }
         val textView: TextView = binding.textHome
-//        homeViewModel.text.observe(viewLifecycleOwner) {
-//            textView.text = it
-//        }
+
         return root
     }
 
@@ -79,6 +68,7 @@ class HomeFragment : Fragment() {
         parentFragmentManager.beginTransaction().detach(this).commit();
         parentFragmentManager.beginTransaction().attach(this).commit();
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         startGettingMovie()
@@ -114,16 +104,10 @@ class HomeFragment : Fragment() {
                     refreshFragment()
                 }
         }
-
-//        imageView?.setImageBitmap(binaryImage)
-//        titleView?.text = title
-//        genreView?.text = "Genres: $genre"
-//        plotView?.text = plot
-
     }
 
     private val client = OkHttpClient()
-
+    var restartsCount = 2
 
     fun runMovie(url: String) {
 
@@ -135,25 +119,39 @@ class HomeFragment : Fragment() {
                 var res: String? = ""
                 client.newCall(request).execute().use { response ->
                     if (!response.isSuccessful) {
-                        runOnUiThread {
-                            Toast.makeText(
-                                activity,
-                                "Catched error, restarting...",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
-                        generateIMDBid()
-                    }
+                        if (restartsCount > 0) {
+                            runOnUiThread {
+                                Toast.makeText(
+                                    activity,
+                                    "Could not connect to servers, restarting...",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                            startGettingMovieAgain()
+                        } else {
+                            runOnUiThread {
+                                val builder = AlertDialog.Builder(activity)
+                                builder.setTitle("Could not connect")
+                                builder.setMessage("The application couldn't successfully connect to servers. It's either maintenance on servers or your internet connection is too weak. Please check your internet connection and try again.")
 
-                    for ((name, value) in response.headers) {
-                        println("$name: $value")
+                                builder.setPositiveButton("Restart") { dialog, which ->
+                                    refreshFragment()
+                                }
+
+                                builder.setNegativeButton("Cancel") { dialog, which ->
+                                }
+                                builder.show()
+                            }
+
+                        }
+
                     }
 
                     res = response.body?.string()
                     var json = JSONObject(res)
-                    println(json)
+
                     if (json.has("Error")) {
-                        println("Unexpected error, trying again...")
+
                         Thread.sleep(1_000)
                         generateIMDBid()
                         return@Thread
@@ -177,7 +175,7 @@ class HomeFragment : Fragment() {
                             val request1 = Request.Builder()
                                 .url(url)
                                 .build()
-                            println("getting series name")
+
                             client.newCall(request1).execute().use { response1 ->
                                 if (!response1.isSuccessful) {
                                     runOnUiThread {
@@ -191,21 +189,18 @@ class HomeFragment : Fragment() {
                                     return@execute
                                 }
 
-                                for ((name, value) in response1.headers) {
-                                    println("$name: $value")
-                                }
 
                                 var json = JSONObject(response1.body?.string())
-                                println(json)
+
                                 if (json.has("Error")) {
-                                    println("Unexpected error")
+
                                 }
                                 if (json.has("Title")) {
                                     seriesTitle = json.getString("Title")
                                 }
                             }
                             if (seriesTitle != null) {
-                                println("found series name: $seriesTitle")
+
                                 title = "$seriesTitle ($title)"
                             }
                         }
@@ -232,21 +227,38 @@ class HomeFragment : Fragment() {
                         } catch (e: java.lang.Exception) {
                             e.printStackTrace()
                         }
-                        println("updating")
+
                         updateText(title, genre, plot, imdbID)
                     }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                runOnUiThread {
-                    Toast.makeText(
-                        activity,
-                        "Catched error, restarting...",
-                        Toast.LENGTH_LONG
-                    ).show()
+                Thread.sleep(5_000)
+                if (restartsCount > 0) {
+
+                    runOnUiThread {
+                        Toast.makeText(
+                            activity,
+                            "Could not connect to servers, restarting...",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    startGettingMovieAgain()
+                } else {
+                    runOnUiThread {
+                        val builder = AlertDialog.Builder(activity)
+                        builder.setTitle("Could not connect")
+                        builder.setMessage("The application couldn't successfully connect to servers. It's either maintenance on servers or your internet connection too weak. Please check your internet connection and try again.")
+
+                        builder.setPositiveButton("Restart") { dialog, which ->
+                            refreshFragment()
+                        }
+
+                        builder.setNegativeButton("Cancel") { dialog, which ->
+                        }
+                        builder.show()
+                    }
                 }
-                generateIMDBid()
-                return@Thread
             }
         }
         thread.start()
@@ -260,9 +272,15 @@ class HomeFragment : Fragment() {
                 .diskCacheStrategy(DiskCacheStrategy.NONE) // because file name is always same
                 .skipMemoryCache(true)
             Glide.with(requireView())
-                .load("https://cataas.com/cat/gif").apply(requestOptions).into(view?.findViewById<ImageView>(R.id.imageView2)!!)
+                .load("https://cataas.com/cat/gif").apply(requestOptions)
+                .into(view?.findViewById<ImageView>(R.id.imageView2)!!)
         }
         generateIMDBid()
+    }
+
+    fun startGettingMovieAgain() {
+        restartsCount -= 1
+        startGettingMovie()
     }
 
     fun generateIMDBid() {
@@ -288,25 +306,22 @@ class HomeFragment : Fragment() {
                 response.use {
                     if (!response.isSuccessful) throw IOException("Unexpected code $response")
 
-                    for ((name, value) in response.headers) {
-                        println("$name: $value")
-                    }
 
                     res = response.body?.string()
                     var json = JSONObject(res)
-                    println(json)
+
                     if (json.has("Error")) {
-                        println("Unexpected error")
+
                         res = null
                         return
                     }
                     res = json.getString("Title")
-                    println(res)
+
                 }
             }
         })
         return res
-        println(res)
+
     }
 
     fun Fragment?.runOnUiThread(action: () -> Unit) {
